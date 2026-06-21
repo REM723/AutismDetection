@@ -1,0 +1,488 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ASD Screening — AQ-10 Predictor</title>
+<style>
+  :root {
+    --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+    --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+    --bg: #fafaf8;
+    --ink: #1a1a18;
+    --muted: #6b6b66;
+    --line: #e4e2dc;
+    --accent: #2f6f5e;
+    --accent-ink: #ffffff;
+    --danger: #b3402f;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, "Inter", "Segoe UI", system-ui, sans-serif;
+    line-height: 1.5;
+  }
+
+  .wrap {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 64px 24px 96px;
+  }
+
+  .kicker {
+    margin: 0 0 8px;
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  h1 {
+    margin: 0 0 12px;
+    font-size: 32px;
+    letter-spacing: -0.01em;
+  }
+
+  .lede {
+    margin: 0;
+    color: var(--muted);
+    font-size: 15px;
+  }
+
+  .disclaimer {
+    margin-top: 20px;
+    padding: 12px 16px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: #fff;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  fieldset {
+    margin: 40px 0 0;
+    padding: 0;
+    border: none;
+  }
+
+  legend {
+    padding: 0 0 16px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .question {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .question p {
+    margin: 0;
+    font-size: 14.5px;
+  }
+
+  .toggle {
+    display: inline-flex;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    overflow: hidden;
+    flex: none;
+  }
+
+  .toggle button {
+    appearance: none;
+    border: none;
+    background: #fff;
+    color: var(--ink);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 7px 14px;
+    cursor: pointer;
+    transition: background 150ms ease, color 150ms ease, transform 160ms var(--ease-out);
+  }
+
+  .toggle button:active {
+    transform: scale(0.95);
+  }
+
+  .toggle button + button {
+    border-left: 1px solid var(--line);
+  }
+
+  .toggle button[aria-pressed="true"] {
+    background: var(--accent);
+    color: var(--accent-ink);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-top: 16px;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .field.full { grid-column: 1 / -1; }
+
+  .field label {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 500;
+  }
+
+  input, select {
+    font-family: inherit;
+    font-size: 14.5px;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--ink);
+    transition: border-color 150ms ease;
+  }
+
+  input:focus, select:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+
+  .score-row {
+    margin-top: 28px;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  .score-row strong {
+    font-size: 20px;
+    color: var(--ink);
+  }
+
+  .submit {
+    appearance: none;
+    border: none;
+    width: 100%;
+    margin-top: 28px;
+    padding: 14px;
+    border-radius: 10px;
+    background: var(--accent);
+    color: var(--accent-ink);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 160ms var(--ease-out), opacity 160ms ease;
+  }
+
+  .submit:active { transform: scale(0.97); }
+  .submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .error {
+    margin-top: 16px;
+    color: var(--danger);
+    font-size: 13.5px;
+  }
+
+  .result {
+    margin-top: 32px;
+    padding: 24px;
+    border-radius: 14px;
+    border: 1px solid var(--line);
+    background: #fff;
+    transform-origin: top center;
+    opacity: 0;
+    transform: scale(0.96) translateY(4px);
+    transition: opacity 220ms var(--ease-out), transform 220ms var(--ease-out);
+  }
+
+  .result.visible {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+
+  .result h2 {
+    margin: 0 0 6px;
+    font-size: 20px;
+  }
+
+  .result p {
+    margin: 0 0 16px;
+    color: var(--muted);
+    font-size: 13.5px;
+  }
+
+  .bar-track {
+    height: 8px;
+    border-radius: 999px;
+    background: var(--line);
+    overflow: hidden;
+  }
+
+  .bar-fill {
+    height: 100%;
+    width: 0%;
+    border-radius: 999px;
+    background: var(--accent);
+    transition: width 420ms var(--ease-out);
+  }
+
+  .bar-label {
+    margin-top: 8px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .result, .submit, .toggle button { transition-duration: 1ms; }
+  }
+</style>
+</head>
+<body>
+  <main class="wrap">
+    <p class="kicker">AQ-10 · Random Forest</p>
+    <h1>Autism Spectrum Screening</h1>
+    <p class="lede">
+      Answer the AQ-10 questionnaire below. A random forest model trained on the
+      UCI Autism Screening dataset estimates the likelihood of an ASD-positive screen.
+    </p>
+    <p class="disclaimer">
+      This is a portfolio demo, not a diagnostic tool. The AQ-10 is a screening
+      instrument only — a positive result is not a diagnosis. Talk to a clinician
+      for an actual assessment.
+    </p>
+
+    <form id="form">
+      <fieldset>
+        <legend>AQ-10 questionnaire</legend>
+        <div id="questions"></div>
+      </fieldset>
+
+      <fieldset>
+        <legend>About you</legend>
+        <div class="grid" id="extraFields"></div>
+      </fieldset>
+
+      <div class="score-row">
+        <span>AQ-10 score</span>
+        <strong id="scoreValue">0</strong><span>/ 10</span>
+      </div>
+
+      <button type="submit" class="submit" id="submitBtn">Get prediction</button>
+      <p class="error" id="error" hidden></p>
+    </form>
+
+    <section class="result" id="result">
+      <h2 id="resultTitle"></h2>
+      <p id="resultSub"></p>
+      <div class="bar-track"><div class="bar-fill" id="barFill"></div></div>
+      <p class="bar-label" id="barLabel"></p>
+    </section>
+  </main>
+
+  <script>
+    const AQ_ITEMS = [
+      { key: "A1_Score", text: "I often notice small sounds when others do not.", yesScores: true },
+      { key: "A2_Score", text: "I usually concentrate more on the whole picture, rather than small details.", yesScores: false },
+      { key: "A3_Score", text: "I find it easy to do more than one thing at once.", yesScores: false },
+      { key: "A4_Score", text: "If there is an interruption, I can switch back to what I was doing very quickly.", yesScores: false },
+      { key: "A5_Score", text: "I find it easy to 'read between the lines' when someone is talking to me.", yesScores: false },
+      { key: "A6_Score", text: "I know how to tell if someone listening to me is getting bored.", yesScores: false },
+      { key: "A7_Score", text: "When I'm reading a story, I find it difficult to work out the characters' intentions.", yesScores: true },
+      { key: "A8_Score", text: "I like to collect information about categories of things.", yesScores: true },
+      { key: "A9_Score", text: "I find it easy to work out what someone is thinking or feeling just by looking at their face.", yesScores: false },
+      { key: "A10_Score", text: "I find it difficult to work out people's intentions.", yesScores: true },
+    ];
+
+    const answers = {};
+    const questionsEl = document.getElementById("questions");
+
+    function makeToggle(name, leftLabel, rightLabel, leftValue, rightValue, onChange) {
+      const wrap = document.createElement("div");
+      wrap.className = "toggle";
+      [[leftLabel, leftValue], [rightLabel, rightValue]].forEach(([label, value]) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.textContent = label;
+        btn.setAttribute("aria-pressed", "false");
+        btn.addEventListener("click", () => {
+          wrap.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", "false"));
+          btn.setAttribute("aria-pressed", "true");
+          onChange(value);
+        });
+        wrap.appendChild(btn);
+      });
+      return wrap;
+    }
+
+    AQ_ITEMS.forEach((item) => {
+      const row = document.createElement("div");
+      row.className = "question";
+      const p = document.createElement("p");
+      p.textContent = item.text;
+      const agreeValue = item.yesScores ? 1 : 0;
+      const disagreeValue = item.yesScores ? 0 : 1;
+      const toggle = makeToggle(item.key, "Agree", "Disagree", agreeValue, disagreeValue, (value) => {
+        answers[item.key] = value;
+        updateScore();
+      });
+      row.append(p, toggle);
+      questionsEl.appendChild(row);
+    });
+
+    function updateScore() {
+      const score = AQ_ITEMS.reduce((sum, item) => sum + (answers[item.key] || 0), 0);
+      document.getElementById("scoreValue").textContent = score;
+      answers.result = score;
+    }
+
+    const extra = {};
+    const extraFieldsEl = document.getElementById("extraFields");
+
+    function addSelectField(name, label, options, full = false) {
+      const field = document.createElement("div");
+      field.className = "field" + (full ? " full" : "");
+      const labelEl = document.createElement("label");
+      labelEl.textContent = label;
+      const select = document.createElement("select");
+      select.innerHTML = options.map((o) => `<option value="${o.value}">${o.text}</option>`).join("");
+      select.addEventListener("change", () => { extra[name] = select.value; });
+      extra[name] = select.value;
+      field.append(labelEl, select);
+      extraFieldsEl.appendChild(field);
+    }
+
+    function addYesNoField(name, label, classes) {
+      const field = document.createElement("div");
+      field.className = "field";
+      const labelEl = document.createElement("label");
+      labelEl.textContent = label;
+      const noValue = classes.find((c) => c.toLowerCase() === "no") || classes[0];
+      const yesValue = classes.find((c) => c.toLowerCase() === "yes") || classes[1];
+      extra[name] = noValue;
+      const toggle = makeToggle(name, "No", "Yes", noValue, yesValue, (value) => { extra[name] = value; });
+      field.append(labelEl, toggle);
+      extraFieldsEl.appendChild(field);
+    }
+
+    function addNumberField(name, label) {
+      const field = document.createElement("div");
+      field.className = "field";
+      const labelEl = document.createElement("label");
+      labelEl.textContent = label;
+      const input = document.createElement("input");
+      input.type = "number";
+      input.min = "1";
+      input.max = "120";
+      input.required = true;
+      input.value = "21";
+      extra[name] = input.value;
+      input.addEventListener("input", () => { extra[name] = input.value; });
+      field.append(labelEl, input);
+      extraFieldsEl.appendChild(field);
+    }
+
+    async function init() {
+      const options = await fetch("/options").then((r) => r.json());
+
+      addNumberField("age", "Age");
+      addSelectField("gender", "Gender", [
+        { value: "f", text: "Female" },
+        { value: "m", text: "Male" },
+      ]);
+      addSelectField(
+        "ethnicity",
+        "Ethnicity",
+        options.ethnicity.map((c) => ({ value: c, text: c }))
+      );
+      addYesNoField("jaundice", "Born with jaundice?", options.jaundice);
+      addYesNoField("austim", "Immediate family member with autism?", options.austim);
+      addSelectField(
+        "contry_of_res",
+        "Country of residence",
+        options.contry_of_res.map((c) => ({ value: c, text: c })),
+        true
+      );
+      addYesNoField("used_app_before", "Used a screening app before?", options.used_app_before);
+      addSelectField(
+        "relation",
+        "Who is completing this?",
+        options.relation.map((c) => ({ value: c, text: c }))
+      );
+
+      updateScore();
+    }
+
+    init();
+
+    const form = document.getElementById("form");
+    const errorEl = document.getElementById("error");
+    const resultEl = document.getElementById("result");
+    const submitBtn = document.getElementById("submitBtn");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      errorEl.hidden = true;
+      resultEl.classList.remove("visible");
+
+      if (AQ_ITEMS.some((item) => answers[item.key] === undefined)) {
+        errorEl.textContent = "Please answer every AQ-10 question.";
+        errorEl.hidden = false;
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Predicting…";
+
+      const payload = { ...extra, ...answers };
+
+      try {
+        const res = await fetch("/predict", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Prediction failed.");
+
+        const pct = Math.round(data.probability * 100);
+        document.getElementById("resultTitle").textContent =
+          data.prediction === 1 ? "ASD-positive screen" : "ASD-negative screen";
+        document.getElementById("resultSub").textContent =
+          data.prediction === 1
+            ? "The model's pattern match leans toward an ASD-positive screen."
+            : "The model's pattern match leans toward an ASD-negative screen.";
+        document.getElementById("barLabel").textContent = `${pct}% estimated likelihood`;
+
+        resultEl.classList.add("visible");
+        requestAnimationFrame(() => {
+          document.getElementById("barFill").style.width = pct + "%";
+        });
+      } catch (err) {
+        errorEl.textContent = err.message;
+        errorEl.hidden = false;
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Get prediction";
+      }
+    });
+  </script>
+</body>
+</html>
