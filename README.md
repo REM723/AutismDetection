@@ -26,6 +26,8 @@ See `Autism Prediction.ipynb`:
 
 ## Usage
 
+### Notebook
+
 ```python
 import pickle
 import pandas as pd
@@ -37,6 +39,19 @@ encoders = pickle.load(open("encoders.pkl", "rb"))
 model.predict(X)
 ```
 
+### Landing page demo
+
+`app.py` is a small Flask app that serves `index.html` — an AQ-10 questionnaire form
+that calls the trained model live and returns a prediction with probability.
+
+```bash
+pip install flask scikit-learn
+python app.py
+# open http://127.0.0.1:5000
+```
+
+This is a portfolio demo, not a diagnostic tool.
+
 ## Requirements
 
-`pandas`, `numpy`, `scikit-learn`, `xgboost`, `imbalanced-learn`, `matplotlib`, `seaborn`
+`pandas`, `numpy`, `scikit-learn`, `xgboost`, `imbalanced-learn`, `matplotlib`, `seaborn`, `flask`
